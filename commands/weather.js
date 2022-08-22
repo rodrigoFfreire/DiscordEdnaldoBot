@@ -53,16 +53,13 @@ module.exports = {
 
 
             const tmz = data.timezone;
-            console.log(data);
             const sunrise = new Date((data.sys.sunrise + tmz) * 1000);
             const sunset = new Date((data.sys.sunset + tmz) * 1000);
 
 
             const date = new Date();
             const unix_offset = parseInt((date.getTime() / 1000) + data.timezone).toFixed(0);
-            console.log(unix_offset);
             const local_date = new Date(unix_offset * 1000);
-            console.log(local_date); 
 
 
             const sun_hours = [sunrise.getUTCHours(), sunset.getUTCHours()];
