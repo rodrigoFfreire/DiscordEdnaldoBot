@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES5"
+    },
+    "include": [
+        "./index.js",
+        "./events/*.js",
+        "./commands/*.js",
+        "./*.env"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
