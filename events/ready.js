@@ -12,7 +12,7 @@ module.exports = {
 		    version: "9"
 	    }).setToken(process.env.TOKEN);
 
-		if (process.env.COMMANDS_STATE === 'DEV') {
+		if (process.env.VERSION === 'DEV') {
 			(async () => {
 				try {
 					console.log('Started refreshing application (/) commands.');
