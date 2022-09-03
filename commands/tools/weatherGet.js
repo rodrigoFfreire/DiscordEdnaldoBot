@@ -1,5 +1,4 @@
-const {SlashCommandBuilder, ContextMenuCommandBuilder} = require('@discordjs/builders');
-const {ActionRowBuilder, SelectMenuBuilder} = require('discord.js');
+const {SlashCommandBuilder, ContextMenuCommandBuilder, ActionRowBuilder, SelectMenuBuilder} = require('discord.js');
 require('dotenv').config();
 const fetch = require('node-fetch');
 
