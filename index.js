@@ -1,49 +1,36 @@
-const dotenv = require('dotenv');
+require('dotenv').config();
 const fetch = require('node-fetch');
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Intents, Message } = require('discord.js');
-const interactionCreate = require('./events/interactionCreate');
-const allIntents = new Intents(32767);
-dotenv.config();
+const { Client, Collection, GatewayIntentBits, Partials, Message } = require('discord.js');
 
 
 const client = new Client({
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MEMBERS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_BANS
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildBans,
+		GatewayIntentBits.GuildMessages
+	],
+	partials: [
+		'Partials.Channel'
 	]
 });
 
-const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith('.js'));
-
-const commands = [];
-
 client.commands = new Collection();
+client.commandArray = [];
+const functionFolders = fs.readdirSync('./functions');
 
 
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	commands.push(command.data.toJSON());
-	client.commands.set(command.data.name, command);
+
+for (const folder of functionFolders) {
+	const functionFiles = fs
+		.readdirSync(`./functions/${folder}`)
+		.filter((file) => file.endsWith('.js'));
+	for (const file of functionFiles)
+		require(`./functions/${folder}/${file}`)(client);
 }
 
-const eventFiles = fs
-	.readdirSync('./events')
-	.filter(file => file.endsWith('.js'));
-
-
-for (const file of eventFiles) {
-	const event = require(`./events/${file}`);
-
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args, commands));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args, commands));
-	}
-}
-
-
+client.eventHandler();
+client.commandHandler();
 client.login(process.env.TOKEN);
