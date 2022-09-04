@@ -1,3 +1,5 @@
+const { ActivityType } = require('discord.js');
+
 module.exports = (client) => {
   client.presencePicker = async (options) => {
     const options = [
@@ -23,11 +25,11 @@ module.exports = (client) => {
       .setPresence({
         activities: [
           {
-            name: options[options].text,
-            type: options[option].type,
+            name: options[presence].text,
+            type: options[presence].type,
           },
         ],
-        status: options[option].status,
+        status: options[presence].status,
       })
       .catch(console.error);
   };
