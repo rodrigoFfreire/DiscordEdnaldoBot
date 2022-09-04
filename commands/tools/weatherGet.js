@@ -59,7 +59,6 @@ module.exports = {
     let resolvedCityCoords = [];
 
     const GEOCODE_CALL = `http://api.openweathermap.org/geo/1.0/direct?q=${CITY}&limit=${RESULT_LIMIT}&appid=${process.env.WEATHER_API_KEY}`;
-    const WEATHER_CALL = `http://api.openweathermap.org/data/2.5/weather?&lat=${resolvedCityCoords[0]}&lon=${resolvedCityCoords[1]}&appid=${process.env.WEATHER_API_KEY}&units=metric`;
 
     // GEOCODE API
     try {
@@ -100,11 +99,15 @@ module.exports = {
       geo_data_filtered[0].lat,
       geo_data_filtered[0].lon,
     ];
+    console.log(resolvedCityCoords, geo_data_filtered);
+
+    const WEATHER_CALL = `http://api.openweathermap.org/data/2.5/weather?&lat=${resolvedCityCoords[0]}&lon=${resolvedCityCoords[1]}&appid=${process.env.WEATHER_API_KEY}&units=metric`;
 
     // WEATHER API
     try {
       const raw = await fetch(WEATHER_CALL);
       weather_data = await raw.json();
+      console.log(weather_data);
     } catch (error) {
       console.log(error, "WEATHER API FAILED!");
       interaction.reply({
@@ -118,6 +121,7 @@ module.exports = {
     const unix_offset = parseInt(
       date.getTime() / 1000 + weather_data.timezone
     ).toFixed(0);
+    const local_date = new Date(unix_offset * 1000);
 
     const sun_hours = [
       new Date((weather_data.sys.sunrise + tmz) * 1000).getUTCHours(),
@@ -127,8 +131,9 @@ module.exports = {
       new Date((weather_data.sys.sunrise + tmz) * 1000).getUTCMinutes(),
       new Date((weather_data.sys.sunset + tmz) * 1000).getUTCMinutes(),
     ];
-    const local_hours = [new Date(unix_offset * 1000).getUTCHours()];
-    const local_minutes = [new Date(unix_offset * 1000).getUTCMinutes()];
+    
+    const local_hours = [local_date.getUTCHours()];
+    const local_minutes = [local_date.getUTCMinutes()];
 
     const format_time = (hours, minutes) => {
       let hours_formatted = [],
