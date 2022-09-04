@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('discord.js');
-require('../../index');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,10 +18,8 @@ module.exports = {
             interaction.guild.members.fetch()
                 .then(members => {
                     members.forEach(member => {
-                            //console.log(`Id:${member.user.id} || Username:${member.user.username}`);
                             if (member.user.id === '286998797249282050') return;
                             if (member.user.id === '488298163980075010') return;
-                            //const memberID =  interaction.guild.members.cache.get(member.user.id);
                         try {
                             member.setNickname(newnick);
                         } catch {
