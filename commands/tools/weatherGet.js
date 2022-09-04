@@ -65,7 +65,6 @@ module.exports = {
     try {
       const raw = await fetch(GEOCODE_CALL);
       geo_data = await raw.json();
-      console.log("GEOCODE", geo_data);
     } catch (error) {
       console.log(error, "GEOCODE API FAILED!");
       return await interaction.reply({
@@ -109,7 +108,7 @@ module.exports = {
     } catch (error) {
       console.log(error, "WEATHER API FAILED!");
       interaction.reply({
-        content: `:( Erro na API! Tenta mais tarde Causa: ${error.message}`,
+        content: `:( Erro na API! Causa: ${error.message}`,
         ephemeral: true,
       });
     }
