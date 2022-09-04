@@ -22,6 +22,10 @@ module.exports = {
             const button = buttons.get(customId);
 
             if (!button) return new Error('This button was not found!');
+            
+            if (button.data.name === 'pretonazi') {
+                await interaction.message.delete();
+            }
 
             try {
                 await button.execute(interaction, client);
