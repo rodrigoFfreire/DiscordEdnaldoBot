@@ -1,4 +1,4 @@
-const {SlashCommandBuilder, ContextMenuCommandBuilder, ActionRowBuilder, SelectMenuBuilder} = require('discord.js');
+const {SlashCommandBuilder, SelectMenuBuilder, ActionRowBuilder, SelectMenuOptionBuilder} = require('discord.js');
 require('dotenv').config();
 const fetch = require('node-fetch');
 
@@ -11,6 +11,12 @@ module.exports = {
                 .setName('city')
                 .setDescription('\{Cidade,Pa\u00eds\} (Ex: Lisbon,PT)')
                 .setRequired(true)
+        )
+        .addStringOption((option) => 
+            option
+                .setName('state')
+                .setDescription('Para pa\u00edses que sejam constituidos por estados (Ex: California, British Columbia...)')
+                .setRequired(false)
         ),
     async execute(interaction, client) {
         console.log(`WEATHER UTILIZADO POR ${interaction.user.id}`);
@@ -18,61 +24,33 @@ module.exports = {
         const days = ['Domingo', 'Segunda', 'Ter\u00e7a', 'Quarta', 'Quinta', 'Sexta', 'S\u00e1bado'];
         const RESULT_LIMIT = 3;
         const CITY_OPTION = interaction.options.getString('city');
-        const CITY_CITY = CITY_OPTION.charAt(0).toUpperCase() + CITY_OPTION.slice(1, -3).toLowerCase();
-        const CITY_COUNTRY = CITY_OPTION.slice(-2).toUpperCase();
+        const STATE = interaction.options.getString('state');
+        const CITY = CITY_OPTION.charAt(0).toUpperCase() + CITY_OPTION.slice(1, -3).toLowerCase();
+        const COUNTRY = CITY_OPTION.slice(-2).toUpperCase();
         let resolvedCityCoords = [0, 0];
 
-        const GEOCODE_CALL = `http://api.openweathermap.org/geo/1.0/direct?q=${CITY_CITY}&limit=${RESULT_LIMIT}&appid=${process.env.WEATHER_API_KEY}`
+        const GEOCODE_CALL = `http://api.openweathermap.org/geo/1.0/direct?q=${CITY}&limit=${RESULT_LIMIT}&appid=${process.env.WEATHER_API_KEY}`
         
-        console.log(CITY_CITY, CITY_COUNTRY);
-
         // GEOCODE API
         try {
             const raw = await fetch(GEOCODE_CALL);
             const data = await raw.json();
             console.log('GEOCODE', data);
-            
-            let responses = [{label: '', description: 'Primeiro Resultado', value: 'first_option'},{label: '', description: 'Segundo Resultado', value: 'second_option'},{label: '', description: 'Terceiro Resultado', value: 'third_option'},{label: 'Nenhuma das acima', description: 'Nao foi possivel encontrar essa localidade :(', value: 'not_found'}];
-            for (let i = 0; i < data.length; i++) {
-                console.log(data[i].country);
-                if ('state' in data[i]) {
-                    responses[i].label = `${data[i].name}, ${data[i].country}/${data[i].state}`;
-                } else {
-                    responses[i].label = `${data[i].name}, ${data[i].country}`;
-                }
 
-                if (data[i].country === CITY_COUNTRY) {
-                    resolvedCityCoords = [data[i].lat, data[i].lon];
-                    console.log(resolvedCityCoords[0], resolvedCityCoords[1]);
+            data_filtered = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].country !== COUNTRY) {
+                    if (i >= data.length - 1 && data_filtered.length === 0) throw new Error('Pa\u00ed nao valido!');
                 }
             }
-            // responses.splice(data.length, RESULT_LIMIT - 1);
-            // console.log(responses);
 
             
         } catch(error) {
             console.log(error, 'GEOCODE API FAILED!');
-            interaction.reply({content: ':( Erro na API! Tenta mais tarde :(', ephemeral: true});
+            interaction.reply({content: `:( Erro na API! Causa: ${error}`, ephemeral: true});
         }
 
-        // try {
-        //     const select_menu = new ActionRowBuilder()
-        //         .addComponents(
-        //             new SelectMenuBuilder()
-        //                 .setCustomId('select')
-        //                 .setPlaceholder('Escolhe a localidade que pretendias')
-        //                 .addOptions(...responses)
-        //         )
-            
-        //     await interaction.reply({
-        //         content: 'Escolhe a localidade correta',
-        //         components: [select_menu],
-        //         ephemeral: true
-        //     });
-
-        // } catch (e) {
-        //     console.error('ERRO NO SELECT MENU', e);
-        // }
+        
 
         const WEATHER_CALL = `http://api.openweathermap.org/data/2.5/weather?&lat=${resolvedCityCoords[0]}&lon=${resolvedCityCoords[1]}&appid=${process.env.WEATHER_API_KEY}&units=metric`
 
@@ -120,7 +98,7 @@ module.exports = {
 
             if (data.coord.lon === 0 && data.coord.lat === 0) {interaction.reply({content: "Local N\u00e3o V\u00e1lido!"})} 
             else {
-                await interaction.reply({content: `Dados de ${CITY_CITY}, ${CITY_COUNTRY}:\n\nTemperatura: ${data.main.temp.toFixed(1)} C   (${data.main.temp_min.toFixed(1)}/${data.main.temp_max.toFixed(1)}) C\nHumidade: ${data.main.humidity} %\nPress\u00e3o: ${data.main.pressure} mBar\nVisibilidade: ${(data.visibility/1000).toFixed(0)} Km\n\nNascer do Sol: ${format_time(sun_hours, sun_minutes)[0][0]}:${format_time(sun_hours, sun_minutes)[1][0]}\nP\u00f4r do Sol: ${format_time(sun_hours, sun_minutes)[0][1]}:${format_time(sun_hours, sun_minutes)[1][1]}\nData e Hora Local: ${days[local_date.getDay()]}, ${local_date.getDate()}/${local_date.getMonth() + 1}/${local_date.getFullYear()} - ${format_time(local_hours, local_minutes)[0]}:${format_time(local_hours, local_minutes)[1]}`});
+                await interaction.reply({content: `Dados de ${CITY}, ${COUNTRY}:\n\nTemperatura: ${data.main.temp.toFixed(1)} C   (${data.main.temp_min.toFixed(1)}/${data.main.temp_max.toFixed(1)}) C\nHumidade: ${data.main.humidity} %\nPress\u00e3o: ${data.main.pressure} mBar\nVisibilidade: ${(data.visibility/1000).toFixed(0)} Km\n\nNascer do Sol: ${format_time(sun_hours, sun_minutes)[0][0]}:${format_time(sun_hours, sun_minutes)[1][0]}\nP\u00f4r do Sol: ${format_time(sun_hours, sun_minutes)[0][1]}:${format_time(sun_hours, sun_minutes)[1][1]}\nData e Hora Local: ${days[local_date.getDay()]}, ${local_date.getDate()}/${local_date.getMonth() + 1}/${local_date.getFullYear()} - ${format_time(local_hours, local_minutes)[0]}:${format_time(local_hours, local_minutes)[1]}`});
             }
         } catch(error) {
             console.log(error, 'WEATHER API FAILED!');
