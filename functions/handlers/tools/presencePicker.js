@@ -1,7 +1,24 @@
 module.exports = (client) => {
   client.presencePicker = async (options) => {
-    const presence = Math.floor(Math.random() * options.length);
+    const options = [
+        {
+            type: ActivityType.Playing,
+            text: 'with your moms balls',
+            status: 'online'
+        },
+        {
+            type: ActivityType.Watching,
+            text: 'Better Call Deez Nuts',
+            status: 'idle'
+        },
+        {
+            type: ActivityType.Listening,
+            text: 'to Coca Cola Light Remix',
+            status: 'dnd'
+        },
+    ];
 
+    const presence = Math.floor(Math.random() * options.length);
     await client.user
       .setPresence({
         activities: [
