@@ -3,7 +3,7 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = re
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('button')
-		.setDescription('Responde com um bot\u00c3o surpresa!'),
+		.setDescription('Responde com um bot\u00e3o surpresa!'),
 	async execute(interaction, client) {
 		console.log(`BUTTON UTILIZADO POR ${interaction.user.id}`);
 		const button = new ButtonBuilder()
