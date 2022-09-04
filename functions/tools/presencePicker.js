@@ -1,7 +1,7 @@
 const { ActivityType } = require('discord.js');
 
 module.exports = (client) => {
-  client.presencePicker = async (options) => {
+  client.presencePicker = async () => {
     const options = [
         {
             type: ActivityType.Playing,
@@ -21,8 +21,7 @@ module.exports = (client) => {
     ];
 
     const presence = Math.floor(Math.random() * options.length);
-    await client.user
-      .setPresence({
+    client.user.setPresence({
         activities: [
           {
             name: options[presence].text,
@@ -30,7 +29,6 @@ module.exports = (client) => {
           },
         ],
         status: options[presence].status,
-      })
-      .catch(console.error);
+      });
   };
 };
