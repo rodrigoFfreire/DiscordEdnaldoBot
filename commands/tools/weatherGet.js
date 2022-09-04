@@ -54,8 +54,9 @@ module.exports = {
     const CITY = CITY_OPTION.toLowerCase();
     const COUNTRY = COUNTRY_OPTION.toUpperCase();
     let geo_data = [];
-    let weather_data = [];
     let geo_data_filtered = [];
+    let weather_data = [];
+    let resolvedCityCoords = [];
 
     const GEOCODE_CALL = `http://api.openweathermap.org/geo/1.0/direct?q=${CITY}&limit=${RESULT_LIMIT}&appid=${process.env.WEATHER_API_KEY}`;
     const WEATHER_CALL = `http://api.openweathermap.org/data/2.5/weather?&lat=${resolvedCityCoords[0]}&lon=${resolvedCityCoords[1]}&appid=${process.env.WEATHER_API_KEY}&units=metric`;
@@ -96,7 +97,7 @@ module.exports = {
         geo_data_filtered.push(geo_data[0]);
     }
 
-    let resolvedCityCoords = [
+    resolvedCityCoords = [
       geo_data_filtered[0].lat,
       geo_data_filtered[0].lon,
     ];
