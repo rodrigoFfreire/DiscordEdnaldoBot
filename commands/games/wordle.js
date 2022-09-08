@@ -48,9 +48,17 @@ module.exports = {
                 )
         ),
 	async execute(interaction, client) {
-		await interaction.reply({
-            content : 'WIP',
+        const allowedChannel = 1017443366226645032;
+        if (interaction.channel.id === allowedChannel) return await interaction.reply({
+            content : 'O comando /wordle apenas pode ser utilizado em <#1017443366226645032>',
             ephemeral : true
         });
+        const interactionAuthor = await interaction.guild.members.fetch(interaction.user.id)
+        console.log(interactionAuthor.user.username);
+        return await interaction.reply({
+            content : 'nigga',
+            ephemeral : true
+        });
+
 	},
 };
