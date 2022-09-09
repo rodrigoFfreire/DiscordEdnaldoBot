@@ -1,3 +1,10 @@
+const SQUARES = {
+  none : 0,
+  black : 1,
+  yellow : 2,
+  green : 3
+}
+
 const WORDLEWORDS = [
   "aback",
   "abase",
@@ -2310,4 +2317,4 @@ const WORDLEWORDS = [
   "zonal",
 ];
 
-export { WORDLEWORDS };
+module.exports = { WORDLEWORDS, SQUARES};

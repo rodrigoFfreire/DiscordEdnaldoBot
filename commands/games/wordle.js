@@ -1,5 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 
+const { start } = require('./wordle_subcommands/wordleStart.js');
+const { result } = require('./wordle_subcommands/wordleResult');
+const { help } = require('./wordle_subcommands/wordleHelp');
+const { erase } = require('./wordle_subcommands/wordleDelete');
+const { answer } = require('./wordle_subcommands/wordleAnswer');
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('wordle')
@@ -48,17 +54,16 @@ module.exports = {
                 )
         ),
 	async execute(interaction, client) {
-        const allowedChannel = 1017443366226645032;
-        if (interaction.channel.id === allowedChannel) return await interaction.reply({
-            content : 'O comando /wordle apenas pode ser utilizado em <#1017443366226645032>',
-            ephemeral : true
-        });
-        const interactionAuthor = await interaction.guild.members.fetch(interaction.user.id)
-        console.log(interactionAuthor.user.username);
-        return await interaction.reply({
-            content : 'nigga',
-            ephemeral : true
-        });
-
+        if (interaction.options.getSubcommand() === 'help') {
+            help(interaction);
+        } else if (interaction.options.getSubcommand() === 'start') {
+            await start(interaction);
+        } else if (interaction.options.getSubcommand() === 'delete') {
+            erase(interaction);
+        } else if (interaction.options.getSubcommand() === 'answer') {
+            answer(interaction);
+        } else if (interaction.options.getSubcommand() === 'result') {
+            result(interaction);
+        }
 	},
 };
