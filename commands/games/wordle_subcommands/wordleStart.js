@@ -7,6 +7,7 @@ module.exports = {
     start: async (interaction) => {
         let sql_command = '';
         let gameId;
+        let halt = 0;
 
         const allowedChannel = 1017443366226645032;
         if (interaction.channel.id != allowedChannel) return await interaction.reply({
@@ -23,49 +24,67 @@ module.exports = {
             driver : sqlite3.Database
         }).catch((err) => {interaction.reply({content : 'Erro no comando! - open db', ephemeral : true}); return console.error(err)});
 
-        // Insert new row
-        sql_command = `INSERT INTO games (player_id, secret_word, attempts_num, win, finished, thread_id, att0, att1, att2, att3, att4, att5) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
-        await db.run(sql_command, [`${interactionAuthor.id}`,`${secretWord}`,0,0,0,0,'none','none','none','none','none','none'])
-            .catch((err) => {interaction.reply({content : 'Erro no comando! - new game', ephemeral : true}); return console.error(err.message)});
-
-        // Get newly created game´s game_id
-        sql_command = `SELECT * FROM games ORDER BY game_id DESC LIMIT 1`;
-        await db.each(sql_command, (err, row) => {
+        // Check if player already has an active game
+        sql_command = `SELECT * FROM games WHERE player_id = ?`
+        await db.each(sql_command, [interactionAuthor.id], (err, row) => {
             if (err) {
-                interaction.reply({content : 'Erro no comando! - get game id', ephemeral : true}); 
-                return console.error(err.message)
+                interaction.reply({content : 'Erro no comando! - check for opened game', ephemeral : true});
+                console.error(err);   
             }
-            gameId = row.game_id;
+            if (row) {
+                interaction.reply({content : 'Tens um jogo pendente! Acaba primeiro esse jogo antes de iniciares outro pff', ephemeral : true});
+                halt = 1;
+            }
         });
+ 
+        if (halt !== 1) {
+            // Insert new row
+            sql_command = `INSERT INTO games (player_id, secret_word, attempts_num, win, finished, thread_id, att0, att1, att2, att3, att4, att5) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+            await db.run(sql_command, [`${interactionAuthor.id}`,`${secretWord}`,0,0,0,0,'none','none','none','none','none','none'])
+                .catch((err) => {interaction.reply({content : 'Erro no comando! - new game', ephemeral : true}); return console.error(err.message)});
 
-        // Creates new channel where the game will happen
-        await interaction.guild.channels.create({
-            name: `${interactionAuthor.user.username}-${gameId}`,
-            type: ChannelType.GuildText,
-            permissionOverwrites: [
-               {
-                 id: interaction.guild.roles.everyone,
-                 deny: [PermissionFlagsBits.ViewChannel],
-               },
-               {
-                id: interaction.user.id,
-                allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
-               }
-            ],
-          })
+            // Get newly created game´s game_id
+            sql_command = `SELECT * FROM games ORDER BY game_id DESC LIMIT 1`;
+            await db.each(sql_command, (err, row) => {
+                if (err) {
+                    interaction.reply({content : 'Erro no comando! - get game id', ephemeral : true}); 
+                    return console.error(err.message)
+                }
+                gameId = row.game_id;
+            });
 
-        // Changes thread_id to correct value
-        const thread = await interaction.guild.channels.cache.find(t => t.name === `${interactionAuthor.user.username.toLowerCase()}-${gameId}`);
-        sql_command = `UPDATE games SET thread_id = ? WHERE game_id = ?`
-        await db.run(sql_command, [thread.id, gameId])
-          .catch((err) => {interaction.reply({content : 'Erro no comando! - change thread_id', ephemeral : true}); return console.error(err.message)})
+            // Creates new channel where the game will happen
+            await interaction.guild.channels.create({
+                name: `${interactionAuthor.user.username}-${gameId}`,
+                type: ChannelType.GuildText,
+                permissionOverwrites: [
+                {
+                    id: interaction.guild.roles.everyone,
+                    deny: [PermissionFlagsBits.ViewChannel],
+                },
+                {
+                    id: interaction.user.id,
+                    allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
+                }
+                ],
+            })
 
-        // Closes database
-        await db.close()
-            .catch((err) => {interaction.reply({content : 'Erro no comando! - close db', ephemeral : true}); return console.error(err.message)})
+            // Changes thread_id to correct value
+            const thread = await interaction.guild.channels.cache.find(t => t.name === `${interactionAuthor.user.username.toLowerCase()}-${gameId}`);
+            sql_command = `UPDATE games SET thread_id = ? WHERE game_id = ?`
+            await db.run(sql_command, [thread.id, gameId])
+            .catch((err) => {interaction.reply({content : 'Erro no comando! - change thread_id', ephemeral : true}); return console.error(err.message)})
 
-        await interaction.reply({content: 'Novo jogo criado com successo', ephemeral:true});
-        return await thread.send(`O teu jogo de Wordle comecou aqui <@${interactionAuthor.id}>`);
+            // Closes database
+            await db.close()
+                .catch((err) => {interaction.reply({content : 'Erro no comando! - close db', ephemeral : true}); return console.error(err.message)})
+
+            await interaction.reply({content: 'Novo jogo criado com successo', ephemeral:true});
+            return await thread.send(`O teu jogo de Wordle comecou aqui <@${interactionAuthor.id}>`);
+        } else {
+            await db.close()
+                .catch((err) => {interaction.reply({content : 'Erro no comando! - close db', ephemeral : true}); return console.error(err.message)})
+        }
 
     }
 }
