@@ -55,7 +55,7 @@ module.exports = {
         ),
 	async execute(interaction, client) {
         if (interaction.options.getSubcommand() === 'help') {
-            help(interaction);
+            await help(interaction);
         } else if (interaction.options.getSubcommand() === 'start') {
             await start(interaction);
         } else if (interaction.options.getSubcommand() === 'delete') {
