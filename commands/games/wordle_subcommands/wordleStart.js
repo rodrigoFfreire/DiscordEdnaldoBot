@@ -24,8 +24,8 @@ module.exports = {
         }).catch((err) => {interaction.reply({content : 'Erro no comando! - open db', ephemeral : true}); return console.error(err)});
 
         // Insert new row
-        sql_command = `INSERT INTO games (player_id, secret_word, attempts_num, win, finished, thread_id) VALUES (?,?,?,?,?,?)`
-        await db.run(sql_command, [`${interactionAuthor.id}`,`${secretWord}`,0,false,false,0])
+        sql_command = `INSERT INTO games (player_id, secret_word, attempts_num, win, finished, thread_id, att0, att1, att2, att3, att4, att5) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+        await db.run(sql_command, [`${interactionAuthor.id}`,`${secretWord}`,0,0,0,0,'none','none','none','none','none','none'])
             .catch((err) => {interaction.reply({content : 'Erro no comando! - new game', ephemeral : true}); return console.error(err.message)});
 
         // Get newly created game´s game_id
