@@ -1,8 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 
-const { start } = require('./wordle_subcommands/wordleStart.js');
-const { result } = require('./wordle_subcommands/wordleResult');
-const { help } = require('./wordle_subcommands/wordleHelp');
+const { start } = require('./wordle_subcommands/wordleStart');
+const { result } = require('./wordle_subcommands/wordleShare');
 const { erase } = require('./wordle_subcommands/wordleDelete');
 const { answer } = require('./wordle_subcommands/wordleAnswer');
 
@@ -10,11 +9,6 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('wordle')
 		.setDescription('Joga uma partida de Wordle!')
-        .addSubcommand((subcommand) =>
-            subcommand
-                .setName('help')
-                .setDescription('Info acerca de todos os subcomandos associados a /wordle')
-        )
         .addSubcommand((subcommand) => 
             subcommand
                 .setName('start')
@@ -44,26 +38,26 @@ module.exports = {
         )
         .addSubcommand((subcommand) =>
             subcommand
-                .setName('result')
+                .setName('share')
                 .setDescription('Mostra um jogo de Wordle previamente terminado!')
                 .addIntegerOption((option) =>
                     option
-                        .setName('resultid')
+                        .setName('gameid')
                         .setDescription('Id do jogo pretendido')
                         .setRequired(true)
                 )
         ),
 	async execute(interaction, client) {
-        if (interaction.options.getSubcommand() === 'help') {
-            await help(interaction);
-        } else if (interaction.options.getSubcommand() === 'start') {
+        if (interaction.options.getSubcommand() === 'start') {
             await start(interaction);
         } else if (interaction.options.getSubcommand() === 'delete') {
-            erase(interaction);
+            await erase(interaction);
         } else if (interaction.options.getSubcommand() === 'answer') {
-            answer(interaction);
-        } else if (interaction.options.getSubcommand() === 'result') {
-            result(interaction);
+            const word = interaction.options.getString('word');
+            await answer(interaction, word);
+        } else if (interaction.options.getSubcommand() === 'share') {
+            const gameId = interaction.options.getInteger('gameid');
+            await result(interaction, gameId);
         }
 	},
 };

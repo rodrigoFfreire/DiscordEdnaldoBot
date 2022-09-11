@@ -1,8 +1,8 @@
 const SQUARES = {
-  none : 0,
-  black : 1,
-  yellow : 2,
-  green : 3
+  0 : 'none',
+  1 : '⬜',
+  2 : '🟨',
+  3 : '🟩'
 }
 
 const WORDLEWORDS = [
