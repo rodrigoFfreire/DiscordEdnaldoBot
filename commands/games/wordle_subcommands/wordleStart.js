@@ -44,8 +44,8 @@ module.exports = {
             return;
         }
         // Insert new row
-        sql_command = `INSERT INTO games (player_id, secret_word, attempts_num, win, finished, thread_id, att0, att1, att2, att3, att4, att5, message_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
-        await db.run(sql_command, [`${interactionAuthor.id}`,`${secretWord.toUpperCase()}`,0,0,0,'0','none','none','none','none','none','none','0'])
+        sql_command = `INSERT INTO games (secret_word, attempts_num, win, finished, player_id ,thread_id, message_id, attempts) VALUES (?,?,?,?,?,?,?,?)`
+        await db.run(sql_command, [`${secretWord.toUpperCase()}`, 0, 0, 0, `${interactionAuthor.id}`, '0', '0', 'none'])
             .catch((err) => {interaction.reply({content : 'Erro no comando! - new game', ephemeral : true}); return console.error(err.message)});
 
         // Get newly created game´s game_id

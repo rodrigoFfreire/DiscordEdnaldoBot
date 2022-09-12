@@ -23,9 +23,7 @@ module.exports = {
                     interaction.reply({content : 'Erro no comando! - check for opened game', ephemeral : true});
                 }
                 if (row) {
-                    gameInfo = [row.attempts_num, row.att0, row.att1, row.att2, row.att3, row.att4, row.att5];
-                    gameInfo.splice(-1, 6 - row.attempts_num);
-                    gameInfo.splice(0, 1);
+                    gameInfo = [row.attempts, row.secret_word, row.player_id];
                     halt = false;
                 }
             });
@@ -34,14 +32,15 @@ module.exports = {
         // Prevents Bot Shutting Down
         if (halt === true) return;
 
-        // Organize and send data
-        let data = ``;
-        gameInfo.forEach(att => {
-            const seperateString = att.split(';');
-            data = data + `${seperateString[1]} - ${seperateString[0]}\n`;
+        // Organize and send attempt graph
+        let data = '';
+        let raw = gameInfo[0].split('\n');
+        raw.forEach(att => {
+            let subArray = att.split(';');
+            data = data + `${subArray[1]} - ${subArray[0]}\n`;
         });
-        data = data + `\n**ID: ${requestedId}**`
-        await interaction.reply({ content: data });
+        data = data + `\n**ID: ${requestedId}\t\tPalavra: ${gameInfo[1]}\t\tJogador: <@${gameInfo[2]}>**`
+        return await interaction.reply({ content: data });
 
     }
 }

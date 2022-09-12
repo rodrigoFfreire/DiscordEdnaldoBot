@@ -49,18 +49,12 @@ module.exports = {
                     });
                 }
                 if (row) {
-                    console.log(row);
                     gameInfo = [
                         row.game_id,
                         row.secret_word,
                         row.attempts_num,
                         row.thread_id,
-                        row.att0,
-                        row.att1,
-                        row.att2,
-                        row.att3,
-                        row.att4,
-                        row.att5,
+                        row.attempts,
                         row.message_id,
                     ];
                     halt = false;
@@ -86,14 +80,14 @@ module.exports = {
         attempt.colors.forEach((index) => {
             result.push(SQUARES[index]);
         });
-        const squareAnswer = result.join("");
+        const answerSquares = result.join("");
 
         // First Attempt
         let resultMsg;
         if (gameInfo[2] === 0) {
             await interaction.reply({ content: "*Ednaldo is thinking...*" });
 
-            await thread.send(`${squareAnswer} - ${answerWord}`);
+            await thread.send(`${answerSquares} - ${answerWord}`);
             await thread.messages
                 .fetch({ limit: 1 })
                 .then(m => {
@@ -101,30 +95,28 @@ module.exports = {
                 })
                 .catch((err) => console.error(err.message));
 
-            sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, att${gameInfo[2]} = ? WHERE game_id = ?`;
+            sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, attempts = ? WHERE game_id = ?`;
             await db
-                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${answerWord};${squareAnswer}`, gameInfo[0]])
+                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${answerWord};${answerSquares}`, gameInfo[0]])
                 .catch((err) => console.error(err));
  
             await interaction.deleteReply();
             // Attempts 2-5
         } else if (gameInfo[2] > 0 && gameInfo[2] < 6) {
             await interaction.reply({ content: "*Ednaldo is thinking...*" });
-            console.log(gameInfo[10]);
             await thread.messages
-                .fetch(`${gameInfo[10]}`)
+                .fetch(`${gameInfo[5]}`)
                 .then((m) => {
                     resultMsg = m;
                 })
                 .catch(err => console.error(err.message));
-            console.log(resultMsg);
             const resultMsg_oldContent = resultMsg.content;
-            await resultMsg.edit(`${resultMsg_oldContent}\n${squareAnswer} - ${answerWord}`);
+            await resultMsg.edit(`${resultMsg_oldContent}\n${answerSquares} - ${answerWord}`);
 
 
-            sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, att${gameInfo[2]} = ? WHERE game_id = ?`;
+            sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, attempts = ? WHERE game_id = ?`;
             await db
-                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${answerWord};${squareAnswer}`, gameInfo[0]])
+                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${gameInfo[4]}` + `\n${answerWord};${answerSquares}`, gameInfo[0]])
                 .catch((err) => console.error(err));
 
             await interaction.deleteReply();
