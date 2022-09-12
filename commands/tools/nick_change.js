@@ -22,6 +22,7 @@ module.exports = {
         
         const target_member = interaction.guild.members.cache.get(interaction.options.getUser('target').id);
         const newnick = interaction.options.getString('nick');
+        if (newnick.length > 32) return interaction.reply({ content : `O limite máximo de caracteres são 32! (${newnick.length})`});
 
         if (interaction.options.getUser('target').id === '286998797249282050') return interaction.reply({
             content: `N\u00e3o \u00e9 poss\u00edvel mudar o Nickname do Server Owner ${target_member}`,

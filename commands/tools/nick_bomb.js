@@ -14,6 +14,7 @@ module.exports = {
         const member_role_check = interaction.guild.members.cache.get(interaction.user.id);
         if (!member_role_check.roles.cache.has('816657464032100393')) return interaction.reply({content: 'N\u00e3o tens permiss\u00e3o para usar este comando!', ephemeral: true});
         const newnick = interaction.options.getString('nick');
+        if (newnick.length > 32) return interaction.reply({ content : `O limite máximo de caracteres são 32! (${newnick.length})`});
         try {
             interaction.guild.members.fetch()
                 .then(members => {
