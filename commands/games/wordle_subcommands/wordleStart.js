@@ -5,6 +5,7 @@ const { ChannelType, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
     start: async (interaction) => {
+        console.log(`WORDLE START UTILIZADO POR ${interaction.user.id}`);
         let sql_command = '';
         let gameId;
         let halt = false;
@@ -27,7 +28,7 @@ module.exports = {
 
         // Check if player already has an active game
         sql_command = `SELECT * FROM games WHERE player_id = ? AND finished = ?`
-        await db.each(sql_command, [`${interactionAuthor.id}`, 0], (err, row) => {
+        await db.each(sql_command, [`${interactionAuthor.id}`, '0'], (err, row) => {
             if (err) {
                 console.error(err);   
                 return interaction.reply({content : 'Erro no comando! - check for opened game', ephemeral : true});
@@ -45,7 +46,7 @@ module.exports = {
         }
         // Insert new row
         sql_command = `INSERT INTO games (secret_word, attempts_num, win, finished, player_id ,thread_id, message_id, attempts) VALUES (?,?,?,?,?,?,?,?)`
-        await db.run(sql_command, [`${secretWord.toUpperCase()}`, 0, 0, 0, `${interactionAuthor.id}`, '0', '0', 'none'])
+        await db.run(sql_command, [`${secretWord.toUpperCase()}`, '0', '0', '0', `${interactionAuthor.id}`, '0', '0', 'none'])
             .catch((err) => {interaction.reply({content : 'Erro no comando! - new game', ephemeral : true}); return console.error(err.message)});
 
         // Get newly created game´s game_id
@@ -59,7 +60,9 @@ module.exports = {
         });
 
         // Creates new channel where the game will happen
+        const category = await interaction.guild.channels.fetch('1019351329551954041');
         await interaction.guild.channels.create({
+            parent: category,
             name: `${authorName}-${gameId}`,
             type: ChannelType.GuildText,
             permissionOverwrites: [
@@ -68,14 +71,20 @@ module.exports = {
                 deny: [PermissionFlagsBits.ViewChannel],
             },
             {
+                id: '776101200688447499',
+                deny: [PermissionFlagsBits.ViewChannel]
+            },
+            {
                 id: interaction.user.id,
                 allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]
             }
             ],
-        })
+        }); 
 
-        // Changes thread_id to correct value
+        // Changes thread_id to correct value and set channel Parent (WORDLES Category)
         const thread = await interaction.guild.channels.cache.find(t => t.name === `${authorName}-${gameId}`);
+        //await thread.setParent('1019351329551954041');
+        
         sql_command = `UPDATE games SET thread_id = ? WHERE game_id = ?`
         await db.run(sql_command, [`${thread.id}`, gameId])
         .catch((err) => {interaction.reply({content : 'Erro no comando! - change thread_id', ephemeral : true}); return console.error(err.message)})

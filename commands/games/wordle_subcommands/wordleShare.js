@@ -1,9 +1,9 @@
-const { WORDLEWORDS } = require('../../../constants/wordle/constants.js');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 
 module.exports = {
     result: async (interaction, gameId) => {
+        console.log(`WORDLE SHARE UTILIZADO POR ${interaction.user.id}`);
         const requestedId = gameId;
         let gameInfo = [];
         let sql_command;
@@ -17,7 +17,7 @@ module.exports = {
 
         sql_command = `SELECT * FROM games WHERE finished = ? AND game_id = ?`;
         await db
-            .each(sql_command, [1, requestedId], (err, row) => {
+            .each(sql_command, ['1', `${requestedId}`], (err, row) => {
                 if (err) {
                     console.error(err);
                     interaction.reply({content : 'Erro no comando! - check for opened game', ephemeral : true});

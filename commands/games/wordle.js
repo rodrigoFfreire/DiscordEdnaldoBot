@@ -16,12 +16,34 @@ module.exports = {
         )
         .addSubcommand((subcommand) =>
             subcommand
-                .setName('delete')
-                .setDescription('Apaga um jogo de Wordle ativo!')
+                .setName('deletesingle')
+                .setDescription('Apaga um único jogo')
                 .addIntegerOption((option) =>
                     option
-                        .setName('gameid')
+                        .setName('deleteid')
                         .setDescription('Id do jogo pretendido')
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName('deleteall')
+                .setDescription('Apaga todos os jogos!!! ⚠️')
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName('deletecustom')
+                .setDescription('Insere um comando SQL (Garante que o comando está correto!)')
+                .addStringOption((option) =>
+                    option
+                        .setName('command')
+                        .setDescription('Comando SQL')
+                        .setRequired(true)
+                )
+                .addStringOption((option) => 
+                    option
+                        .setName('values')
+                        .setDescription('Valores do comando SQL (separados por virgulas)')
                         .setRequired(true)
                 )
         )
@@ -42,7 +64,7 @@ module.exports = {
                 .setDescription('Mostra um jogo de Wordle previamente terminado!')
                 .addIntegerOption((option) =>
                     option
-                        .setName('gameid')
+                        .setName('shareid')
                         .setDescription('Id do jogo pretendido')
                         .setRequired(true)
                 )
@@ -50,14 +72,21 @@ module.exports = {
 	async execute(interaction, client) {
         if (interaction.options.getSubcommand() === 'start') {
             await start(interaction);
-        } else if (interaction.options.getSubcommand() === 'delete') {
-            await erase(interaction);
         } else if (interaction.options.getSubcommand() === 'answer') {
             const word = interaction.options.getString('word');
             await answer(interaction, word);
         } else if (interaction.options.getSubcommand() === 'share') {
-            const gameId = interaction.options.getInteger('gameid');
+            const gameId = interaction.options.getInteger('shareid');
             await result(interaction, gameId);
-        }
+        } else if (interaction.options.getSubcommand() === 'deletesingle') {
+            const gameId = interaction.options.getInteger('deleteid');
+            await erase(interaction, 0, gameId);
+        } else if (interaction.options.getSubcommand() === 'deleteall') {
+            await erase(interaction, 1);
+        } else if (interaction.options.getSubcommand() === 'deletecustom') {
+            const cmd = interaction.options.getString('command');
+            const cmd_values = interaction.options.getString('values');
+            await erase(interaction, 2, 0, cmd, cmd_values);
+        } else return;
 	},
 };

@@ -1305,6 +1305,7 @@ const WORDLEWORDS = [
   "nicer",
   "niche",
   "niece",
+  "nigga",
   "night",
   "ninja",
   "ninny",

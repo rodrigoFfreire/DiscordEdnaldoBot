@@ -6,6 +6,7 @@ const Wordle = require("../wordle_subcommands/helper_functions/wordleClass.js");
 
 module.exports = {
     answer: async (interaction, word) => {
+        console.log(`WORDLE ANSWER UTILIZADO POR ${interaction.user.id}`);
         let sql_command;
         const word_size = 5;
         const threadId = interaction.channel.id;
@@ -15,6 +16,9 @@ module.exports = {
         const answerWord = word.toUpperCase();
         let halt = false;
         let gameInfo = [];
+
+        // Check if command is being ran in correct place
+        if (interaction.channel.parentId !== '1019351329551954041') return await interaction.reply({content: 'N\u00e3o podes usar esse comando aqui!', ephemeral: true});  
 
         // Open database
         const db = await open({
@@ -39,7 +43,7 @@ module.exports = {
         sql_command = `SELECT * FROM games WHERE finished = ? AND thread_id = ? AND player_id = ?`;
         await db.each(
             sql_command,
-            [0, `${threadId}`, `${interactionAuthor.id}`],
+            ['0', `${threadId}`, `${interactionAuthor.id}`],
             (err, row) => {
                 if (err) {
                     console.error(err);
@@ -72,7 +76,7 @@ module.exports = {
         }
 
         // Evaluate answer
-        const thread = await interaction.guild.channels.cache.find(t => t.id == gameInfo[3]);
+        const thread = await interaction.guild.channels.cache.find(t => t.id === gameInfo[3]);
         const attempt = new Wordle(answerWord, gameInfo[1], word_size);
         attempt.logic();
 
@@ -84,7 +88,7 @@ module.exports = {
 
         // First Attempt
         let resultMsg;
-        if (gameInfo[2] === 0) {
+        if (Number(gameInfo[2]) === 0) {
             await interaction.reply({ content: "*Ednaldo is thinking...*" });
 
             await thread.send(`${answerSquares} - ${answerWord}`);
@@ -97,12 +101,12 @@ module.exports = {
 
             sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, attempts = ? WHERE game_id = ?`;
             await db
-                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${answerWord};${answerSquares}`, gameInfo[0]])
+                .run(sql_command, [`${resultMsg.id}`, `${Number(gameInfo[2]) + 1}`, `${answerWord};${answerSquares}`, gameInfo[0]])
                 .catch((err) => console.error(err));
  
             await interaction.deleteReply();
             // Attempts 2-5
-        } else if (gameInfo[2] > 0 && gameInfo[2] < 6) {
+        } else if (Number(gameInfo[2]) > 0 && Number(gameInfo[2]) < 6) {
             await interaction.reply({ content: "*Ednaldo is thinking...*" });
             await thread.messages
                 .fetch(`${gameInfo[5]}`)
@@ -116,7 +120,7 @@ module.exports = {
 
             sql_command = `UPDATE games SET message_id = ?, attempts_num = ?, attempts = ? WHERE game_id = ?`;
             await db
-                .run(sql_command, [`${resultMsg.id}`, gameInfo[2] + 1, `${gameInfo[4]}` + `\n${answerWord};${answerSquares}`, gameInfo[0]])
+                .run(sql_command, [`${resultMsg.id}`, `${Number(gameInfo[2]) + 1}`, `${gameInfo[4]}` + `\n${answerWord};${answerSquares}`, gameInfo[0]])
                 .catch((err) => console.error(err));
 
             await interaction.deleteReply();
@@ -126,17 +130,17 @@ module.exports = {
         if (answerWord === gameInfo[1]) {
             sql_command = `UPDATE games SET win = ?, finished = ? WHERE game_id = ?`
             await db
-                .run(sql_command, [1, 1, gameInfo[0]])
+                .run(sql_command, ['1', '1', gameInfo[0]])
                 .catch((err) => console.error(err));
             await db
                 .close()
                 .catch((err) => console.error(err));
-            return await thread.send(`\n\n🥳Parab\u00e9ns, ganhaste este Wordle em ${gameInfo[2] + 1}/6 tentativas!🥳\nUtiliza /wordle share ${gameInfo[0]} para partilhares o teu jogo com outras pessoas!`);
+            return await thread.send(`\n\n🥳Parab\u00e9ns, ganhaste este Wordle em ${Number(gameInfo[2]) + 1}/6 tentativas!🥳\nUtiliza /wordle share ${gameInfo[0]} para partilhares o teu jogo com outras pessoas!`);
         } else {
-            if (gameInfo[2] + 1 === 6) {
+            if (Number(gameInfo[2]) + 1 === 6) {
                 sql_command = `UPDATE games SET win = ?, finished = ? WHERE game_id = ?`
             await db
-                .run(sql_command, [1, 1, gameInfo[0]])
+                .run(sql_command, ['0', '1', gameInfo[0]])
                 .catch((err) => console.error(err));
             await db
                 .close()
