@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"discord.enabled": false
+		"discord.enabled": false,
+		"workbench.colorTheme": "One Dark Pro"
 	}
 }
