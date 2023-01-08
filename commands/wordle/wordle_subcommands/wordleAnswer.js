@@ -2,7 +2,7 @@ const sqlite3 = require("sqlite3").verbose();
 const { MessageActivityType } = require("discord.js");
 const { open } = require("sqlite");
 const { WORDLEWORDS,SQUARES } = require("../../../constants/wordle/constants.js");
-const Wordle = require("../wordle_subcommands/helper_functions/wordleClass.js");
+const Wordle = require("./helper_functions/wordleClass.js");
 
 module.exports = {
     answer: async (interaction, word) => {
