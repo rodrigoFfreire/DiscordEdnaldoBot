@@ -15,7 +15,7 @@ module.exports = (client) => {
         },
         {
             type: ActivityType.Listening,
-            text: 'to Piao Li Remix',
+            text: 'Bing Chilling Remix',
             status: 'dnd'
         },
     ];
